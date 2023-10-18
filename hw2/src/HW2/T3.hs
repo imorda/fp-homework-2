@@ -14,5 +14,5 @@ epart = foldMap toTuple
   where
     -- This could work just with a single "fold" method if it somehow could unwrap
     -- the Left value, but unfortunately it only works with the Right one :(
-    toTuple (Left left) = (left, mempty)
+    toTuple (Left left)   = (left, mempty)
     toTuple (Right right) = (mempty, right)
