@@ -1,38 +1,48 @@
 module HW2.T4
-  ( DotString (..)
-  , Fun (..)
-  , Inclusive (..)
-  , ListPlus (..)
-  ) where
+  ( DotString (..),
+    Fun (..),
+    Inclusive (..),
+    ListPlus (..),
+  )
+where
 
 data ListPlus a = a :+ ListPlus a | Last a
-  deriving Show
+  deriving (Show)
 
 infixr 5 :+
 
 instance Semigroup (ListPlus a) where
-  (<>) = undefined
+  (<>) (aL :+ aR) b = aL :+ (aR <> b)
+  (<>) (Last a) b = a :+ b
 
 data Inclusive a b = This a | That b | Both a b
-  deriving Show
+  deriving (Show)
 
--- You may necessary constraints there
-instance Semigroup (Inclusive a b) where
-  (<>) = undefined
+instance (Monoid a, Monoid b) => Semigroup (Inclusive a b) where
+  (This a) <> (This b) = This $ a <> b
+  (That a) <> (That b) = That $ a <> b
+  (Both aL aR) <> (Both bL bR) = Both (aL <> bL) (aR <> bR)
+  a <> b = toBoth a <> toBoth b
+    where
+      toBoth (This left) = Both left mempty
+      toBoth (That right) = Both mempty right
+      toBoth both = both
 
 newtype DotString = DS String
-  deriving Show
+  deriving (Show)
 
 instance Semigroup DotString where
-  (<>) = undefined
+  DS "" <> DS b = DS b
+  DS a <> DS "" = DS a
+  DS a <> DS b = DS $ a <> "." <> b
 
 instance Monoid DotString where
-  mempty = undefined
+  mempty = DS ""
 
 newtype Fun a = F (a -> a)
 
 instance Semigroup (Fun a) where
-  (<>) = undefined
+  F a <> F b = F $ b . a
 
 instance Monoid (Fun a) where
-  mempty = undefined
+  mempty = F id
